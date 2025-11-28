@@ -1,22 +1,30 @@
-import { useState } from 'react';
 import { useRouter } from 'next/router';
-import CreateForm from '../components/CreateForm';
+import { useEffect, useState } from 'react';
+import ChatInterface from '../../components/ChatInterface';
 
-export default function Create() {
+interface BotData {
+  name: string;
+  persona: string;
+  image: string;
+}
+
+export default function Chat() {
   const router = useRouter();
+  const { id } = router.query;
+  const [bot, setBot] = useState<BotData | null>(null);
 
-  const handleCreate = (botData: { name: string; persona: string; image: string }) => {
-    const botId = Date.now().toString(); // ID unik sederhana
-    const bots = JSON.parse(localStorage.getItem('bots') || '{}');
-    bots[botId] = botData;
-    localStorage.setItem('bots', JSON.stringify(bots));
-    router.push(`/chat/${botId}`);
-  };
+  useEffect(() => {
+    if (id) {
+      const bots = JSON.parse(localStorage.getItem('bots') || '{}');
+      setBot(bots[id as string] || null);
+    }
+  }, [id]);
+
+  if (!bot) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Create Your AI Bot</h1>
-      <CreateForm onCreate={handleCreate} />
+    <div>
+      <ChatInterface bot={bot} />
     </div>
   );
 }
